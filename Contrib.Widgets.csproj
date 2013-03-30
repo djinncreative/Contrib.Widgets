@@ -149,6 +149,12 @@
   <ItemGroup>
     <Content Include="Views\WidgetsList.cshtml" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Admin\EditWidget.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Admin\CreateContent.cshtml" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

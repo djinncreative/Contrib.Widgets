@@ -1,7 +1,4 @@
-﻿@{
-    Script.Include("admin.edit-widget.js", "admin.edit-widget.min.js");
-    Layout.Title = T("Add Widget").ToString();
-}
+﻿@{ Layout.Title = T("Edit Widget").ToString(); }
 
 @using (Html.BeginFormAntiForgeryPost()) {
     @Html.ValidationSummary()

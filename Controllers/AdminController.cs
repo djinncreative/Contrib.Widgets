@@ -6,6 +6,9 @@ using Contrib.Widgets.Models;
 using Contrib.Widgets.Services;
 using Orchard;
 using Orchard.ContentManagement;
+using Orchard.ContentManagement.Aspects;
+using Orchard.Core.Contents.Controllers;
+using Orchard.Core.Contents.Settings;
 using Orchard.Environment.Extensions;
 using Orchard.Localization;
 using Orchard.Logging;
@@ -21,11 +24,13 @@ namespace Contrib.Widgets.Controllers {
         private readonly IOrchardServices _services;
         private readonly IWidgetsService _widgetsService;
         private readonly IWidgetManager _widgetManager;
+        private readonly IContentManager _contentManager;
 
-        public AdminController(IOrchardServices services, IWidgetsService widgetsService, IWidgetManager widgetManager) {
+        public AdminController(IOrchardServices services, IWidgetsService widgetsService, IWidgetManager widgetManager, IContentManager contentManager) {
             _services = services;
             _widgetsService = widgetsService;
             _widgetManager = widgetManager;
+            _contentManager = contentManager;
             T = NullLocalizer.Instance;
             Logger = NullLogger.Instance;
         }
@@ -33,18 +38,40 @@ namespace Contrib.Widgets.Controllers {
         public ILogger Logger { get; set; }
         public Localizer T { get; set; }
 
-        public ActionResult ListWidgets(int contentId, string zone) {
+        [HttpPost]
+        public ActionResult CreateContent(string id, string zone) {
+            var contentItem = _contentManager.New(id);
+
+            if (!_services.Authorizer.Authorize(Orchard.Core.Contents.Permissions.EditContent, contentItem, T("Couldn't create content")))
+                return new HttpUnauthorizedResult();
+
+            _contentManager.Create(contentItem, VersionOptions.Draft);
+
+            var model = _contentManager.UpdateEditor(contentItem, this);
+            if (!ModelState.IsValid) {
+                _services.TransactionManager.Cancel();
+                return View(model);
+            }
+
+            _services.Notifier.Information(string.IsNullOrWhiteSpace(contentItem.TypeDefinition.DisplayName)
+                ? T("Your content has been created.")
+                : T("Your {0} has been created.", contentItem.TypeDefinition.DisplayName));
+            
+            return RedirectToAction("ListWidgets", new { hostId = contentItem.Id, zone });
+        }
+
+        public ActionResult ListWidgets(int hostId, string zone) {
             var widgetTypes = _widgetsService.GetWidgetTypeNames().OrderBy(x => x).ToList();
             
             var viewModel = _services.New.ViewModel()
                 .WidgetTypes(widgetTypes)
-                .ContentId(contentId)
+                .HostId(hostId)
                 .Zone(zone);
 
             return View(viewModel);
         }
 
-        public ActionResult AddWidget(int contentId, string widgetType, string zone, string returnUrl) {
+        public ActionResult AddWidget(int hostId, string widgetType, string zone, string returnUrl) {
             if (!IsAuthorizedToManageWidgets())
                 return new HttpUnauthorizedResult();
 
@@ -53,13 +80,13 @@ namespace Contrib.Widgets.Controllers {
                 return HttpNotFound();
 
             try {
-                var widgetPosition = _widgetManager.GetWidgets(contentId).Count(widget => widget.Zone == widgetPart.Zone) + 1;
+                var widgetPosition = _widgetManager.GetWidgets(hostId).Count(widget => widget.Zone == widgetPart.Zone) + 1;
                 widgetPart.Position = widgetPosition.ToString(CultureInfo.InvariantCulture);
                 widgetPart.Zone = zone;
                 widgetPart.AvailableLayers = _widgetsService.GetLayers().ToList();
                 widgetPart.LayerPart = _widgetManager.GetContentLayer();
-                
-                var model = _services.ContentManager.BuildEditor(widgetPart).ContentId(contentId);
+
+                var model = _services.ContentManager.BuildEditor(widgetPart).ContentId(hostId);
                 return View(model);
             }
             catch (Exception exception) {
@@ -70,7 +97,8 @@ namespace Contrib.Widgets.Controllers {
         }
 
         [HttpPost, ActionName("AddWidget")]
-        public ActionResult AddWidgetPost(string widgetType, int contentId) {
+        [FormValueRequired("submit.Save")]
+        public ActionResult AddWidgetPost(string widgetType, int hostId) {
             if (!IsAuthorizedToManageWidgets())
                 return new HttpUnauthorizedResult();
 
@@ -79,7 +107,7 @@ namespace Contrib.Widgets.Controllers {
             if (widgetPart == null)
                 return HttpNotFound();
 
-            var contentItem = _services.ContentManager.Get(contentId, VersionOptions.Latest);
+            var contentItem = _services.ContentManager.Get(hostId, VersionOptions.Latest);
             var contentMetadata = _services.ContentManager.GetItemMetadata(contentItem);
             var returnUrl = Url.RouteUrl(contentMetadata.EditorRouteValues);
             var model = _services.ContentManager.UpdateEditor(widgetPart, this);
@@ -99,6 +127,97 @@ namespace Contrib.Widgets.Controllers {
             }
 
             _services.Notifier.Information(T("Your {0} has been added.", widgetPart.TypeDefinition.DisplayName));
+            return Redirect(returnUrl);
+        }
+
+        public ActionResult EditWidget(int hostId, int id) {
+            if (!IsAuthorizedToManageWidgets())
+                return new HttpUnauthorizedResult();
+
+            var contentItem = _services.ContentManager.Get(hostId, VersionOptions.Latest);
+            var contentMetadata = _services.ContentManager.GetItemMetadata(contentItem);
+            var returnUrl = Url.RouteUrl(contentMetadata.EditorRouteValues);
+            var widgetPart = _widgetsService.GetWidget(id);
+
+            if (widgetPart == null) {
+                _services.Notifier.Error(T("Widget not found: {0}", id));
+                return Redirect(returnUrl);
+            }
+            try {
+                var model = _services.ContentManager.BuildEditor(widgetPart);
+                return View(model);
+            }
+            catch (Exception exception) {
+                Logger.Error(T("Editing widget failed: {0}", exception.Message).Text);
+                _services.Notifier.Error(T("Editing widget failed: {0}", exception.Message));
+
+                return Redirect(returnUrl);
+            }
+        }
+
+        [HttpPost, ActionName("EditWidget")]
+        [FormValueRequired("submit.Save")]
+        public ActionResult EditWidgetSavePost(int hostId, int id) {
+            if (!IsAuthorizedToManageWidgets())
+                return new HttpUnauthorizedResult();
+
+            var contentItem = _services.ContentManager.Get(hostId, VersionOptions.Latest);
+            var contentMetadata = _services.ContentManager.GetItemMetadata(contentItem);
+            var returnUrl = Url.RouteUrl(contentMetadata.EditorRouteValues);
+            var widgetPart = _widgetsService.GetWidget(id);
+
+            if (widgetPart == null)
+                return HttpNotFound();
+
+            try {
+                var model = _services.ContentManager.UpdateEditor(widgetPart, this);
+                var widgetExPart = widgetPart.As<WidgetExPart>();
+                
+                widgetPart.LayerPart = _widgetManager.GetContentLayer();
+                widgetExPart.Host = contentItem;
+
+                if (!ModelState.IsValid) {
+                    _services.TransactionManager.Cancel();
+                    return View(model);
+                }
+
+                _services.Notifier.Information(T("Your {0} has been saved.", widgetPart.TypeDefinition.DisplayName));
+            }
+            catch (Exception exception) {
+                Logger.Error(T("Editing widget failed: {0}", exception.Message).Text);
+                _services.Notifier.Error(T("Editing widget failed: {0}", exception.Message));
+            }
+
+            return Redirect(returnUrl);
+        }
+
+        [HttpPost, ActionName("EditWidget")]
+        [FormValueRequired("submit.Delete")]
+        public ActionResult EditWidgetDeletePOST(int id, int hostId) {
+            return DeleteWidget(id, hostId);
+        }
+
+        private ActionResult DeleteWidget(int id, int hostId) {
+            if (!IsAuthorizedToManageWidgets())
+                return new HttpUnauthorizedResult();
+
+            var contentItem = _services.ContentManager.Get(hostId, VersionOptions.Latest);
+            var contentMetadata = _services.ContentManager.GetItemMetadata(contentItem);
+            var returnUrl = Url.RouteUrl(contentMetadata.EditorRouteValues);
+            var widgetPart = _widgetsService.GetWidget(id);
+
+            if (widgetPart == null)
+                return HttpNotFound();
+
+            try {
+                _widgetsService.DeleteWidget(widgetPart.Id);
+                _services.Notifier.Information(T("Widget was successfully deleted"));
+            }
+            catch (Exception exception) {
+                Logger.Error(T("Removing Widget failed: {0}", exception.Message).Text);
+                _services.Notifier.Error(T("Removing Widget failed: {0}", exception.Message));
+            }
+
             return Redirect(returnUrl);
         }
 
