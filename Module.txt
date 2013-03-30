@@ -1,0 +1,15 @@
+﻿Name: Contrib Widgets
+AntiForgery: enabled
+Author: The Orchard Team
+Website: http://orchardproject.net
+Version: 1.0
+OrchardVersion: 1.6
+Description: Adds a new WidgetsContainerPart, providing the ability to assign widgets with content items.
+Dependencies: Orchard.Widgets, Orchard.Themes, Orchard.jQuery
+Category: Widget
+Features:
+    Contrib.Widgets.WidgetsContainer:
+        Name: Widgets Container
+        Description: Adds a new WidgetsContainerPart, providing the ability to assign widgets with content items.
+        Category: Widget
+        Dependencies: Contrib.Widgets

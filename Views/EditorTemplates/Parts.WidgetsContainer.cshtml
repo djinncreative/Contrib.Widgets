@@ -1,0 +1,54 @@
+﻿@using Contrib.Widgets.Models
+@{
+    Style.Include("admin.widgets-container.css", "admin.widgets-container.min.css");
+    Script.Require("jQueryUI_Dialog");
+    Script.Include("admin.widgets-container.js", "admin.widgets-container.min.js");
+    
+    var zones = Model.Zones;
+    var zonePreviewImage = (string)Model.ZonePreviewImage;
+    var allWidgets = (IEnumerable<WidgetExPart>) Model.Widgets;
+    var contentItem = Model.ContentItem;
+}
+
+<fieldset>
+    <input type="hidden" name="returnUrl"/>
+    <input type="hidden" name="submit.Save" value="submit.Save" />
+    <legend>@T("Widgets")</legend>
+    <div class="widgets group">
+        <div class="layout-widgets-placement">
+            <div class="zones-container">
+                <div class="zones">
+                    <ol>
+                        @foreach (var zone in zones) {
+                            var widgets = allWidgets.Where(x => x.Zone == zone);
+                            <li>
+                                <h2>@zone</h2>
+                                <div class="zone-actions">
+                                    <a class="button grey add-widget" href="@Url.Action("ListWidgets", "Admin", new { area = "Contrib.Widgets", contentId = contentItem.Id, zone})">@T("Add")</a>
+                                </div>
+                                <ul class="widgets">
+                                    @foreach (var widget in widgets) {
+                                        <li>
+                                            <h3>@Html.ItemEditLinkWithReturnUrl(Html.ItemDisplayText(widget).ToString(), widget)</h3>
+                                            <div class="widget-actions">
+                                                <a href="#">@T("Remove")</a>
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                            </li>
+                        }
+                    </ol>
+                </div>
+            </div>
+        </div>
+        <div class="layout-widgets-assistance">
+            <div class="theme-preview">
+                <img title="The Theme Machine zone preview" src="@Url.Content(zonePreviewImage)" alt="The Theme Machine zone preview">
+            </div>
+        </div>
+    </div>
+    <div id="widgets-library-dialog" title="@T("Widgets Library")">
+        <iframe class="content-container"></iframe>
+    </div>
+</fieldset>
