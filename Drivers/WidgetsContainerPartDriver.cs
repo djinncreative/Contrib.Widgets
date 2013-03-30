@@ -42,6 +42,10 @@ namespace Contrib.Widgets.Drivers {
         }
 
         protected override DriverResult Display(WidgetsContainerPart part, string displayType, dynamic shapeHelper) {
+            // TODO: make DisplayType configurable
+            if (displayType != "Detail")
+                return null;
+
             var widgetParts = _widgetManager.GetWidgets(part.Id);
 
             // Build and add shape to zone.
