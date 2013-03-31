@@ -82,29 +82,46 @@ namespace Contrib.Widgets.Drivers {
 
         protected override DriverResult Editor(WidgetsContainerPart part, IUpdateModel updater, dynamic shapeHelper) {
             var viewModel = new WidgetsContainerViewModel();
-            updater.TryUpdateModel(viewModel, null, null, null);
-
-            if (!string.IsNullOrEmpty(viewModel.WidgetPlacement)) {
-                var data = JsonConvert.DeserializeXNode(viewModel.WidgetPlacement);
-                var zonesNode = data.Root;
-
-                foreach (var zoneNode in zonesNode.Elements()) {
-                    var zoneName = zoneNode.Name.ToString();
-                    var widgetElements = zoneNode.Elements("widgets");
-                    var position = 0;
-
-                    foreach (var widget in widgetElements
-                        .Select(widgetNode => XmlConvert.ToInt32(widgetNode.Value))
-                        .Select(widgetId => _widgetsService.GetWidget(widgetId))
-                        .Where(widget => widget != null)) {
-
-                        widget.Position = (position++).ToString();
-                        widget.Zone = zoneName;
-                    }
-                }
+            if (updater.TryUpdateModel(viewModel, null, null, null)) {
+                UpdatePositions(viewModel);
+                RemoveWidgets(viewModel);
             }
 
             return Editor(part, shapeHelper);
+        }
+
+        private void RemoveWidgets(WidgetsContainerViewModel viewModel) {
+            if (string.IsNullOrEmpty(viewModel.RemovedWidgets))
+                return;
+
+            var widgetIds = JsonConvert.DeserializeObject<int[]>(viewModel.RemovedWidgets);
+
+            foreach (var widgetId in widgetIds) {
+                _widgetsService.DeleteWidget(widgetId);
+            }
+        }
+
+        private void UpdatePositions(WidgetsContainerViewModel viewModel) {
+            if (string.IsNullOrEmpty(viewModel.WidgetPlacement))
+                return;
+
+            var data = JsonConvert.DeserializeXNode(viewModel.WidgetPlacement);
+            var zonesNode = data.Root;
+
+            foreach (var zoneNode in zonesNode.Elements()) {
+                var zoneName = zoneNode.Name.ToString();
+                var widgetElements = zoneNode.Elements("widgets");
+                var position = 0;
+
+                foreach (var widget in widgetElements
+                    .Select(widgetNode => XmlConvert.ToInt32(widgetNode.Value))
+                    .Select(widgetId => _widgetsService.GetWidget(widgetId))
+                    .Where(widget => widget != null)) {
+
+                    widget.Position = (position++).ToString();
+                    widget.Zone = zoneName;
+                }
+            }
         }
     }
 }

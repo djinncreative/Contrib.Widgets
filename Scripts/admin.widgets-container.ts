@@ -4,6 +4,8 @@
 module WidgetsContainer {
     $(function () {
 
+        var removedWidgets = [];
+
         // Handle Add Widget button.
         $(".add-widget").on("click", function (e: JQueryEventObject) {
             e.preventDefault();
@@ -22,6 +24,22 @@ module WidgetsContainer {
             }
             
             form.submit();
+        });
+
+        // Handle Delete Widget button.
+        $("div.widgets").on("click", "a.remove-widget", function (e: JQueryEventObject) {
+            e.preventDefault();
+
+            if(!confirm($(this).data("confirm")))
+                return;
+
+            var li: JQuery = $(this).parents("li:first");
+            var widgetId: number = li.data("widget-id");
+
+            li.remove();
+            removedWidgets.push(widgetId);
+            $("input[name='removedWidgets']").val(JSON.stringify(removedWidgets));
+            updateWidgetPlacementField();
         });
 
         var updateWidgetPlacementField = function () {

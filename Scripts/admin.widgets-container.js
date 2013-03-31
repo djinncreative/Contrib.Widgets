@@ -1,6 +1,7 @@
 var WidgetsContainer;
 (function (WidgetsContainer) {
     $(function () {
+        var removedWidgets = [];
         $(".add-widget").on("click", function (e) {
             e.preventDefault();
             var hostId = $(this).data("host-id");
@@ -15,6 +16,18 @@ var WidgetsContainer;
                 $("input[type='hidden'][name='returnUrl']").val(url);
             }
             form.submit();
+        });
+        $("div.widgets").on("click", "a.remove-widget", function (e) {
+            e.preventDefault();
+            if(!confirm($(this).data("confirm"))) {
+                return;
+            }
+            var li = $(this).parents("li:first");
+            var widgetId = li.data("widget-id");
+            li.remove();
+            removedWidgets.push(widgetId);
+            $("input[name='removedWidgets']").val(JSON.stringify(removedWidgets));
+            updateWidgetPlacementField();
         });
         var updateWidgetPlacementField = function () {
             var widgetPlacementField = $("input[name='widgetPlacement']");
