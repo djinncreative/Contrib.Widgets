@@ -83,6 +83,7 @@
       <DependentUpon>admin.widgets-container.ts</DependentUpon>
     </Content>
     <TypeScriptCompile Include="Scripts\admin.edit-widget.ts" />
+    <Content Include="Scripts\Type\the-admin.d.ts" />
     <Content Include="Scripts\Type\jqueryui.d.ts" />
     <Content Include="Scripts\Type\jquery.d.ts" />
     <Content Include="Styles\admin.widgets-container.css">

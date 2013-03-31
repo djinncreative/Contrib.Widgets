@@ -1,5 +1,6 @@
 /// <reference path="type/jquery.d.ts"/>
 /// <reference path="type/jqueryui.d.ts"/>
+/// <reference path="type/the-admin.d.ts"/>
 
 module WidgetsContainer {
     $(function () {
@@ -73,5 +74,12 @@ module WidgetsContainer {
                 updateWidgetPlacementField();
             }
         });
+
+        // Initialize Expando control
+        $("#widgetsPlacement legend").expandoControl(
+            function (controller) { 
+                return controller.nextAll(".expando"); }, { 
+                    collapse: true, 
+                    remember: true });
     });
 }
