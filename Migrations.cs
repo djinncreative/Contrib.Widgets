@@ -16,7 +16,7 @@ namespace Contrib.Widgets {
 
             ContentDefinitionManager.AlterPartDefinition("WidgetsContainerPart", part => part
                 .Attachable()
-                .WithDescription("Enables content items to contain widgets, removing the need to create a layer rule per content item."));
+                .WithSetting("ContentPartSettings.Description", "Enables content items to contain widgets, removing the need to create a layer rule per content item."));
 
             return 1;
         }

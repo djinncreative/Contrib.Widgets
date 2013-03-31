@@ -86,7 +86,7 @@ namespace Contrib.Widgets.Controllers {
                 widgetPart.AvailableLayers = _widgetsService.GetLayers().ToList();
                 widgetPart.LayerPart = _widgetManager.GetContentLayer();
 
-                var model = _services.ContentManager.BuildEditor(widgetPart).ContentId(hostId);
+                var model = _services.ContentManager.BuildEditor(widgetPart).HostId(hostId);
                 return View(model);
             }
             catch (Exception exception) {
@@ -110,7 +110,7 @@ namespace Contrib.Widgets.Controllers {
             var contentItem = _services.ContentManager.Get(hostId, VersionOptions.Latest);
             var contentMetadata = _services.ContentManager.GetItemMetadata(contentItem);
             var returnUrl = Url.RouteUrl(contentMetadata.EditorRouteValues);
-            var model = _services.ContentManager.UpdateEditor(widgetPart, this);
+            var model = _services.ContentManager.UpdateEditor(widgetPart, this).HostId(hostId);
             var widgetExPart = widgetPart.As<WidgetExPart>();
             try {
                 widgetPart.LayerPart = _widgetManager.GetContentLayer();
@@ -144,7 +144,7 @@ namespace Contrib.Widgets.Controllers {
                 return Redirect(returnUrl);
             }
             try {
-                var model = _services.ContentManager.BuildEditor(widgetPart);
+                var model = _services.ContentManager.BuildEditor(widgetPart).HostId(hostId);
                 return View(model);
             }
             catch (Exception exception) {
@@ -170,7 +170,7 @@ namespace Contrib.Widgets.Controllers {
                 return HttpNotFound();
 
             try {
-                var model = _services.ContentManager.UpdateEditor(widgetPart, this);
+                var model = _services.ContentManager.UpdateEditor(widgetPart, this).HostId(hostId);
                 var widgetExPart = widgetPart.As<WidgetExPart>();
                 
                 widgetPart.LayerPart = _widgetManager.GetContentLayer();
