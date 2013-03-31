@@ -1,18 +1,16 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
+using System.Xml;
 using Contrib.Widgets.Models;
 using Contrib.Widgets.Services;
+using Contrib.Widgets.ViewModels;
+using Newtonsoft.Json;
 using Orchard;
 using Orchard.ContentManagement;
-using Orchard.ContentManagement.Aspects;
 using Orchard.ContentManagement.Drivers;
 using Orchard.DisplayManagement;
-using Orchard.DisplayManagement.Shapes;
 using Orchard.Environment.Extensions;
-using Orchard.Environment.Extensions.Models;
 using Orchard.FileSystems.VirtualPath;
 using Orchard.Themes.Services;
-using Orchard.Widgets.Models;
 using Orchard.Widgets.Services;
 
 namespace Contrib.Widgets.Drivers {
@@ -83,7 +81,29 @@ namespace Contrib.Widgets.Drivers {
         }
 
         protected override DriverResult Editor(WidgetsContainerPart part, IUpdateModel updater, dynamic shapeHelper) {
-            updater.TryUpdateModel(part, Prefix, null, null);
+            var viewModel = new WidgetsContainerViewModel();
+            updater.TryUpdateModel(viewModel, null, null, null);
+
+            if (!string.IsNullOrEmpty(viewModel.WidgetPlacement)) {
+                var data = JsonConvert.DeserializeXNode(viewModel.WidgetPlacement);
+                var zonesNode = data.Root;
+
+                foreach (var zoneNode in zonesNode.Elements()) {
+                    var zoneName = zoneNode.Name.ToString();
+                    var widgetElements = zoneNode.Elements("widgets");
+                    var position = 0;
+
+                    foreach (var widget in widgetElements
+                        .Select(widgetNode => XmlConvert.ToInt32(widgetNode.Value))
+                        .Select(widgetId => _widgetsService.GetWidget(widgetId))
+                        .Where(widget => widget != null)) {
+
+                        widget.Position = (position++).ToString();
+                        widget.Zone = zoneName;
+                    }
+                }
+            }
+
             return Editor(part, shapeHelper);
         }
     }

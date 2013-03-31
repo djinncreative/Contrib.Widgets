@@ -2,7 +2,7 @@
 @using Orchard.Environment.Extensions.Models
 @{
     Style.Include("admin.widgets-container.css", "admin.widgets-container.min.css");
-    Script.Require("jQueryUI_Dialog");
+    Script.Require("jQueryUI_Sortable");
     Script.Include("admin.widgets-container.js", "admin.widgets-container.min.js");
     
     var zones = Model.Zones;
@@ -15,6 +15,7 @@
 <fieldset>
     <input type="hidden" name="returnUrl"/>
     <input type="hidden" name="submit.Save" />
+    <input type="hidden" name="widgetPlacement"/>
     <legend>@T("Widgets")</legend>
     <div class="widgets group">
         <div class="layout-widgets-placement">
@@ -22,7 +23,7 @@
                 <div class="zones">
                     <ol>
                         @foreach (var zone in zones) {
-                            var widgets = allWidgets.Where(x => x.Zone == zone);
+                            var widgets = allWidgets.Where(x => x.Zone == zone).OrderBy(w => w.Position, new Orchard.UI.FlatPositionComparer());
                             var addWidgetUrl = contentItem.Id != 0 
                                 ? Url.Action("ListWidgets", "Admin", new { area = "Contrib.Widgets", hostId = contentItem.Id, zone})
                                 : Url.Action("CreateContent", "Admin", new { area = "Contrib.Widgets", id = contentItem.ContentType, zone});
@@ -31,9 +32,9 @@
                                 <div class="zone-actions">
                                     <a class="button grey add-widget" href="@addWidgetUrl" data-host-id="@contentItem.Id">@T("Add")</a>
                                 </div>
-                                <ul class="widgets">
+                                <ul class="widgets" data-zone="@zone" id="@zone">
                                     @foreach (var widget in widgets) {
-                                        <li>
+                                        <li data-widget-id="@widget.Id">
                                             <h3><a href="@Url.Action("EditWidget", "Admin", new { area = "Contrib.Widgets", hostId = contentItem.Id, id = widget.Id })">@Html.ItemDisplayText(widget)</a></h3>
                                             <div class="widget-actions">
                                                 <a href="#">@T("Remove")</a>

@@ -37,12 +37,20 @@
                         }
 
                         ul.widgets {
+                            min-height: 10px;
+
                             li {
                                 position: relative;
                                 background: #f3f4f5;
                                 margin: 10px 0;
                                 padding: 5px 100px 5px 25px;
                                 color: #333;
+
+                                &.sortable-placeholder {
+                                    border: 1px dashed #eaeaea;
+                                    height: 35px;
+                                    background: transparent;
+                                }
 
                                 h3 {
                                     margin: 0 0 0.2em;

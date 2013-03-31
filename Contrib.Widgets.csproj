@@ -46,6 +46,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\lib\newtonsoft.json\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.ComponentModel.DataAnnotations">
@@ -81,10 +85,6 @@
     <TypeScriptCompile Include="Scripts\admin.edit-widget.ts" />
     <Content Include="Scripts\Type\jqueryui.d.ts" />
     <Content Include="Scripts\Type\jquery.d.ts" />
-    <TypeScriptCompile Include="Scripts\Type\Sample.ts" />
-    <Content Include="Scripts\Type\Sample.js">
-      <DependentUpon>Sample.ts</DependentUpon>
-    </Content>
     <Content Include="Styles\admin.widgets-container.css">
       <DependentUpon>admin.widgets-container.less</DependentUpon>
     </Content>

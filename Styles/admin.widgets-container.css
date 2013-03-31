@@ -33,12 +33,20 @@
   right: 10px;
   top: 5px;
 }
+.widgets .layout-widgets-placement .zones-container .zones ol li ul.widgets {
+  min-height: 10px;
+}
 .widgets .layout-widgets-placement .zones-container .zones ol li ul.widgets li {
   position: relative;
   background: #f3f4f5;
   margin: 10px 0;
   padding: 5px 100px 5px 25px;
   color: #333;
+}
+.widgets .layout-widgets-placement .zones-container .zones ol li ul.widgets li.sortable-placeholder {
+  border: 1px dashed #eaeaea;
+  height: 35px;
+  background: transparent;
 }
 .widgets .layout-widgets-placement .zones-container .zones ol li ul.widgets li h3 {
   margin: 0 0 0.2em;

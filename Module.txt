@@ -2,7 +2,7 @@
 AntiForgery: enabled
 Author: Darksky Development / Sipke Schoorstra
 Website: http://darkskydevelopment.net
-Version: 1.6
+Version: 1.6.1
 OrchardVersion: 1.6
 Description: Add widgets per content item without creating new layers. Attach the WidgetContainerPart to content types to which you want to be able to add widgets.
 Dependencies: Orchard.Widgets, Orchard.Themes, Orchard.jQuery

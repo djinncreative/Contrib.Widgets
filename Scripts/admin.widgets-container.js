@@ -16,6 +16,33 @@ var WidgetsContainer;
             }
             form.submit();
         });
+        var updateWidgetPlacementField = function () {
+            var widgetPlacementField = $("input[name='widgetPlacement']");
+            var data = {
+                zones: {
+                }
+            };
+            $("div.widgets ul.widgets").each(function () {
+                var zone = $(this).data("zone");
+                data.zones[zone] = {
+                    widgets: []
+                };
+                $(this).find("li").each(function () {
+                    var widgetId = $(this).data("widget-id");
+                    data.zones[zone].widgets.push(widgetId);
+                });
+            });
+            var text = JSON.stringify(data);
+            widgetPlacementField.val(text);
+        };
+        $("div.widgets ul.widgets").sortable({
+            connectWith: "div.widgets ul.widgets",
+            dropOnEmpty: true,
+            placeholder: "sortable-placeholder",
+            receive: function (e, ui) {
+                updateWidgetPlacementField();
+            }
+        });
     });
 })(WidgetsContainer || (WidgetsContainer = {}));
 
