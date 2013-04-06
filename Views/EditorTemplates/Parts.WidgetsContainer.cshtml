@@ -53,9 +53,11 @@
                 </div>
             </div>
             <div class="layout-widgets-assistance">
-                <div class="theme-preview">
-                    <img title="@T("{0} zone preview", theme.Name)" src="@Url.Content(zonePreviewImage)" alt="@T("{0} zone preview", theme.Name)">
-                </div>
+                @if (!String.IsNullOrEmpty(zonePreviewImage)) {
+                    <div class="theme-preview">
+                        <img title="@T("{0} zone preview", theme.Name)" src="@Url.Content(zonePreviewImage)" alt="@T("{0} zone preview", theme.Name)">
+                    </div>
+                }
             </div>
         </div>
     </div>
