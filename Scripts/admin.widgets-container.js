@@ -54,6 +54,9 @@ var WidgetsContainer;
             placeholder: "sortable-placeholder",
             receive: function (e, ui) {
                 updateWidgetPlacementField();
+            },
+            update: function (e, ui) {
+                updateWidgetPlacementField();
             }
         });
         $("#widgetsPlacement legend").expandoControl(function (controller) {
