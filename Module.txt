@@ -1,6 +1,6 @@
 ﻿Name: Contrib Widgets
 AntiForgery: enabled
-Author: Darksky Development / Sipke Schoorstra
+Author: IDeliverable
 Website: https://github.com/sfmskywalker/Contrib.Widgets
 Version: 1.7
 OrchardVersion: 1.7
