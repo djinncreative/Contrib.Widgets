@@ -11,6 +11,8 @@ namespace Contrib.Widgets.Drivers {
         }
 
         protected override void Exporting(WidgetExPart part, ExportContentContext context) {
+            if (part == null || part.Host == null)
+			     return;
             context.Element(part.PartDefinition.Name).SetAttributeValue("HostId", context.ContentManager.GetItemMetadata(part.Host).Identity.ToString());
         }
     }
